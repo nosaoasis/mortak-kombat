@@ -9,7 +9,7 @@ c.fillRect(0, 0, canvas.width, canvas.height);
 
 const gravity = 0.7;
 class Sprite {
-  constructor({ position, velocity, color = "blue", offset }) {
+  constructor({ position, velocity, color = "blue", offset, swordColor }) {
     this.position = position;
     this.velocity = velocity;
     this.width = 50;
@@ -27,6 +27,7 @@ class Sprite {
     this.color = color;
     this.isAttacking;
     this.health = 100;
+    this.swordColor = swordColor;
   }
 
   draw() {
@@ -36,7 +37,7 @@ class Sprite {
     // attackBox draw
 
     if (this.isAttacking) {
-    c.fillStyle = "green";
+    c.fillStyle = this.swordColor;
     c.fillRect(
       this.attackBox.position.x,
       this.attackBox.position.y,
@@ -81,6 +82,7 @@ const player = new Sprite({
     x: 0,
     y: 0,
   },
+  swordColor: "pink",
 });
 
 // create player 2 => enemy
@@ -95,9 +97,10 @@ const enemy = new Sprite({
   },
   color: "brown",
   offset: {
-    x: -50,
+    x: -100,
     y: 0,
   },
+  swordColor: "gray",
 });
 
 const keys = {
@@ -126,6 +129,38 @@ const rectangularCollision = ({ rectangle1, rectangle2 }) => {
     rectangle1.attackBox.position.y <= rectangle2.position.y + rectangle2.height
   );
 };
+
+
+// timer logic
+let timer = 10;
+let timerId = 10;
+
+function determineEndGameStatus ({player, enemy, timerId}) {
+  clearTimeout(timerId)
+  document.querySelector("#displayGameResult").style.display = "flex";
+  if (player.health === enemy.health) {
+    document.querySelector("#displayGameResult").innerHTML =
+      "Mortal Kombat Declares A Tie";
+  } else if (player.health > enemy.health) {
+    document.querySelector("#displayGameResult").innerHTML =
+      "Mortal Kombat Declares Player 1 Winner";
+  } else if (player.health < enemy.health) {
+    document.querySelector("#displayGameResult").innerHTML =
+      "Mortal Kombat Declares Player 2 Winner";
+  }
+}
+function decreaseTimer() {
+  timerId = setTimeout(decreaseTimer, 1000);
+  if (timer > 0) {
+    timer--;
+    document.querySelector("#timer").innerHTML = timer;
+  } 
+  
+  if (timer === 0) {
+    determineEndGameStatus({player, enemy, timerId})
+  }
+}
+decreaseTimer();
 
 function animate() {
   window.requestAnimationFrame(animate);
@@ -161,16 +196,21 @@ function animate() {
     enemy.health -= 5;
     document.querySelector("#enemyHealth").style.width = enemy.health + "%";
   }
-  
+
   // detecting for enemy attack collisions
   if (
     rectangularCollision({ rectangle1: enemy, rectangle2: player }) &&
     enemy.isAttacking
-    ) {
-      console.log("direct hit from enemy");
-      enemy.isAttacking = false;
-      player.health -= 5;
-      document.querySelector("#playerHealth").style.width = player.health + "%";
+  ) {
+    console.log("direct hit from enemy");
+    enemy.isAttacking = false;
+    player.health -= 5;
+    document.querySelector("#playerHealth").style.width = player.health + "%";
+  }
+
+  // ending the game based on the health of a player
+  if (enemy.health <= 0 || player.health <= 0) {
+    determineEndGameStatus({player, enemy, timerId})
   }
 }
 
