@@ -31,7 +31,7 @@ const shop = new Sprite({
 // create player 1 => player
 const player = new Fighter({
   position: {
-    x: 0,
+    x: 20,
     y: 0,
   },
   velocity: {
@@ -43,6 +43,13 @@ const player = new Fighter({
     y: 0,
   },
   swordColor: "pink",
+  imageSrc: './assets/martial_hero/Idle.png',  
+  framesMax: 8,
+  scale: 3,
+  offset: {
+    x: 215,
+    y: 220
+  }
 });
 
 // create player 2 => enemy
@@ -88,7 +95,7 @@ function animate() {
   background.update()
   shop.update()
   player.update();
-  enemy.update();
+  // enemy.update();
 
   player.velocity.x = 0;
   enemy.velocity.x = 0;
