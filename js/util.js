@@ -12,7 +12,7 @@ const rectangularCollision = ({ rectangle1, rectangle2 }) => {
 
 
 // timer logic
-let timer = 10;
+let timer = 61;
 let timerId = 10;
 
 function determineEndGameStatus ({player, enemy, timerId}) {
