@@ -14,19 +14,18 @@ const background = new Sprite({
     x: 0,
     y: 0,
   },
-  imageSrc: './assets/background/background_layer_3_resize.png'
-})
+  imageSrc: "./assets/background/background_layer_3_resize.png",
+});
 
 const shop = new Sprite({
   position: {
     x: 500,
     y: 10,
   },
-  imageSrc: './assets/decorations/shop_anim.png',
+  imageSrc: "./assets/decorations/shop_anim.png",
   scale: 4,
-  framesMax: 6
-})
-
+  framesMax: 6,
+});
 
 // create player 1 => player
 const player = new Fighter({
@@ -43,13 +42,35 @@ const player = new Fighter({
     y: 0,
   },
   swordColor: "pink",
-  imageSrc: './assets/martial_hero/Idle.png',  
+  imageSrc: "./assets/martial_hero/Idle.png",
   framesMax: 8,
   scale: 3,
   offset: {
     x: 215,
-    y: 220
-  }
+    y: 220,
+  },
+  sprites: {
+    idle: {
+      imageSrc: "./assets/martial_hero/Idle.png",
+      framesMax: 8,
+    },
+    run: {
+      imageSrc: "./assets/martial_hero/Run.png",
+      framesMax: 8,
+    },
+    jump: {
+      imageSrc: "./assets/martial_hero/Jump.png",
+      framesMax: 2,
+    },
+    fall: {
+      imageSrc: "./assets/martial_hero/Fall.png",
+      framesMax: 2,
+    },
+    attack1: {
+      imageSrc: "./assets/martial_hero/Attack1.png",
+      framesMax: 6,
+    },
+  },
 });
 
 // create player 2 => enemy
@@ -68,6 +89,35 @@ const enemy = new Fighter({
     y: 0,
   },
   swordColor: "gray",
+  imageSrc: "./assets/kenji/Idle.png",
+  framesMax: 4,
+  scale: 3,
+  offset: {
+    x: 215,
+    y: 238,
+  },
+  sprites: {
+    idle: {
+      imageSrc: "./assets/kenji/Idle.png",
+      framesMax: 4,
+    },
+    run: {
+      imageSrc: "./assets/kenji/Run.png",
+      framesMax: 8,
+    },
+    jump: {
+      imageSrc: "./assets/kenji/Jump.png",
+      framesMax: 2,
+    },
+    fall: {
+      imageSrc: "./assets/kenji/Fall.png",
+      framesMax: 2,
+    },
+    attack1: {
+      imageSrc: "./assets/kenji/Attack1.png",
+      framesMax: 4,
+    },
+  },
 });
 
 const keys = {
@@ -85,17 +135,16 @@ const keys = {
   },
 };
 
-
 decreaseTimer();
 
 function animate() {
   window.requestAnimationFrame(animate);
   c.fillStyle = "black";
   c.fillRect(0, 0, canvas.width, canvas.height);
-  background.update()
-  shop.update()
+  background.update();
+  shop.update();
   player.update();
-  // enemy.update();
+  enemy.update();
 
   player.velocity.x = 0;
   enemy.velocity.x = 0;
@@ -103,18 +152,40 @@ function animate() {
   // player moves
   if (keys.a.pressed && player.lastKey === "a") {
     player.velocity.x = -5;
+    player.switchSprite("run");
   } else if (keys.d.pressed && player.lastKey === "d") {
     player.velocity.x = 5;
+    player.switchSprite("run");
+  } else {
+    player.switchSprite("idle");
+  }
+
+  // player is in the air/jumping
+  if (player.velocity.y < 0) {
+    player.switchSprite("jump");
+  } else if (player.velocity.y > 0) {
+    player.switchSprite("fall")
   }
 
   // enemy moves
   if (keys.ArrowLeft.pressed && enemy.lastKey === "ArrowLeft") {
     enemy.velocity.x = -5;
+    enemy.switchSprite("run");
   } else if (keys.ArrowRight.pressed && enemy.lastKey === "ArrowRight") {
     enemy.velocity.x = 5;
+    enemy.switchSprite("run");
+  } else {
+    enemy.switchSprite("idle");
   }
 
-  // detecting for playing attack collisions
+  // enemy is in the air/jumping
+  if (enemy.velocity.y < 0) {
+    enemy.switchSprite("jump");
+  } else if (enemy.velocity.y > 0) {
+    enemy.switchSprite("fall")
+  }
+
+  // detecting for player attack collisions
   if (
     rectangularCollision({ rectangle1: player, rectangle2: enemy }) &&
     player.isAttacking
@@ -138,7 +209,7 @@ function animate() {
 
   // ending the game based on the health of a player
   if (enemy.health <= 0 || player.health <= 0) {
-    determineEndGameStatus({player, enemy, timerId})
+    determineEndGameStatus({ player, enemy, timerId });
   }
 }
 
